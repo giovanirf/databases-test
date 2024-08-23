@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: exampleuser
+      POSTGRES_PASSWORD: examplepassword
+      POSTGRES_DB: exampledb
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse_container
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+  mongo:
+    image: mongo:latest
+    container_name: mongo_container
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongouser
+      MONGO_INITDB_ROOT_PASSWORD: mongopassword
+  flink:
+    image: flink:latest
+    container_name: flink_container
+    ports:
+      - "8081:8081"
+    command: taskmanager
+    depends_on:
+      - jobmanager
+
+  jobmanager:
+    image: flink:latest
+    container_name: jobmanager
+    ports:
+      - "8082:8082"
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+
+volumes:
+  pgdata:
+  clickhouse_data:
+  mongodata:
